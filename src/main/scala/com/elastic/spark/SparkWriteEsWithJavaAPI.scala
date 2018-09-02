@@ -7,7 +7,7 @@ import org.apache.spark.SparkConf
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.common.xcontent.XContentFactory
 
-object SparkTest {
+object SparkWriteEsWithJavaAPI {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setMaster("local[*]").setAppName("本地")
     val session = SparkSession.builder().config(conf).getOrCreate()

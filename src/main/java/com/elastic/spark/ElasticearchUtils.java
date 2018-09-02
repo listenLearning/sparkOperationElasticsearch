@@ -48,7 +48,7 @@ public class ElasticearchUtils {
                         .put("client.transport.sniff", true)
                         .build();
                 client = new PreBuiltTransportClient(settings)
-                        .addTransportAddress(new TransportAddress(InetAddress.getByName("192.168.41.128"), 9300));
+                        .addTransportAddress(new TransportAddress(InetAddress.getByName("master"), 9300));
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();

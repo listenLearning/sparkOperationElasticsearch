@@ -39,11 +39,11 @@
             <artifactId>transport</artifactId>
             <version>${elasticsearch.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>com.databricks</groupId>
-            <artifactId>spark-csv_${spark.scala.version}</artifactId>
-            <version>1.5.0</version>
-        </dependency>-->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch-spark-20_${spark.scala.version}</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
