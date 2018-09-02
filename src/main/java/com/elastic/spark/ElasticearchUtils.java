@@ -1,5 +1,11 @@
 package com.elastic.spark;
 
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -15,6 +21,8 @@ import sun.rmi.transport.Transport;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ElasticearchUtils {
     private static volatile ElasticearchUtils instance;
@@ -88,6 +96,73 @@ public class ElasticearchUtils {
                 .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3)) //设置回滚策略，等待时间100ms,retry次数为3次
                 .build();
         return processor;
+    }
+
+    /**
+     * 判断是否存在该索引
+     *
+     * @param indexName
+     * @return
+     */
+    public Boolean isIndexExists(String indexName) {
+        IndicesExistsRequestBuilder builder = getClient().admin()
+                .indices()
+                .prepareExists(indexName);
+        IndicesExistsResponse response = builder.get();
+        return response.isExists();
+    }
+
+    /**
+     * 创建索引
+     *
+     * @param indexName
+     * @param shards
+     * @param replicas
+     * @param refresh
+     * @return
+     */
+    public String createIndex(String indexName, Integer shards, Integer replicas, String refresh) {
+        String result = "";
+        try {
+            if (isIndexExists(indexName)) {
+            } else {
+                CreateIndexRequestBuilder builder = getClient().admin().indices().prepareCreate(indexName);
+                Map<String, Object> settings = new HashMap<String, Object>();
+                settings.put("number_of_shards", shards);// 分片数
+                settings.put("number_of_replicas", replicas);// 副本数
+                settings.put("refresh_interval", refresh);// 刷新时间
+                builder.setSettings(settings);
+
+                builder.addMapping(indexName/*, getIndexSource(indexName)*/);
+                CreateIndexResponse response = builder.get();
+                result = response.isAcknowledged() ? "索引创建成功" : "索引创建失败";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 删除索引
+     *
+     * @param indexName
+     * @return
+     */
+    public String deleteIndex(String indexName) {
+        String result = "";
+        try {
+            if (!isIndexExists(indexName)) {
+                System.out.println("");
+            } else {
+                DeleteIndexRequestBuilder builder = client.admin().indices().prepareDelete(indexName);
+                DeleteIndexResponse response = builder.get();
+                result = response.isAcknowledged() ? "索引删除成功" : "索引删除失败";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     /**
